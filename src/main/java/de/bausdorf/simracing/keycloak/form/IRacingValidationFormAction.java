@@ -82,6 +82,7 @@ public class IRacingValidationFormAction implements FormAction, FormActionFactor
 
         configProperties.add(userProperty);
         configProperties.add(passProperty);
+        configProperties.add(keyProperty);
     }
     private final IrDataClient dataClient = new IrDataClientImpl();
     private String iRemail = null;
