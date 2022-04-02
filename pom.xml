@@ -136,6 +136,17 @@
           </descriptorRefs>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <useReleaseProfile>false</useReleaseProfile>
+<!--          <releaseProfiles>release</releaseProfiles>-->
+          <goals>install</goals>
+          <tagNameFormat>v@{version}</tagNameFormat>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
