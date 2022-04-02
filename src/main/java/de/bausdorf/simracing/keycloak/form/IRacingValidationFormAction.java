@@ -1,5 +1,27 @@
 package de.bausdorf.simracing.keycloak.form;
 
+/*-
+ * #%L
+ * de.bausdorf.simracing:keycloak-iracingid-validation
+ * %%
+ * Copyright (C) 2022 bausdorf engineering
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
+
 import de.bausdorf.simracing.irdataapi.client.IrDataClient;
 import de.bausdorf.simracing.irdataapi.client.impl.IrDataClientImpl;
 import de.bausdorf.simracing.irdataapi.model.LoginRequestDto;
@@ -28,30 +50,35 @@ import static org.keycloak.utils.StringUtil.isBlank;
 public class IRacingValidationFormAction implements FormAction, FormActionFactory {
     private static final String PROVIDER_ID = "organization-field-validation-action";
 
+    public static final String IRACING_EMAIL_CONF_KEY = "iRacing.email";
+    public static final String IRACING_PASSWORD_CONF_KEY = "iRacing.password";
+    public static final String IRACING_ATTR_KEY_CONF_KEY = "iRacing.attribute";
+
 	private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-    public static final String IRACING_ID_ATTR = "iRacingId";
-
-    public static final String IRACING_EMAIL_CONF_KEY = "iRacing.email";
-
-    public static final String IRACING_PASSWORD_CONF_KEY = "iRacing.password";
 
     static {
         ProviderConfigProperty userProperty = new ProviderConfigProperty();
         userProperty.setName(IRACING_EMAIL_CONF_KEY);
         userProperty.setLabel("iRacing email");
         userProperty.setType(ProviderConfigProperty.STRING_TYPE);
-        userProperty.setHelpText("Email address used to log into iRacing service");
+        userProperty.setHelpText("Email address used to log into iRacing service.");
 
         ProviderConfigProperty passProperty = new ProviderConfigProperty();
         passProperty.setName(IRACING_PASSWORD_CONF_KEY);
         passProperty.setLabel("iRacing password");
         passProperty.setType(ProviderConfigProperty.STRING_TYPE);
-        passProperty.setHelpText("Password used to log into iRacing service");
+        passProperty.setHelpText("Password used to log into iRacing service.");
+
+        ProviderConfigProperty keyProperty = new ProviderConfigProperty();
+        keyProperty.setName(IRACING_ATTR_KEY_CONF_KEY);
+        keyProperty.setLabel("User profile iRacing ID attribute name");
+        keyProperty.setType(ProviderConfigProperty.STRING_TYPE);
+        keyProperty.setHelpText("Key of the user profile attribute the iRacing ID is read from.");
 
         configProperties.add(userProperty);
         configProperties.add(passProperty);
@@ -92,24 +119,25 @@ public class IRacingValidationFormAction implements FormAction, FormActionFactor
 
     @Override
     public void validate(ValidationContext validationContext) {
-       AuthenticatorConfigModel config = validationContext.getAuthenticatorConfig();
-       iRemail = config.getConfig().get(IRACING_EMAIL_CONF_KEY);
-       iRpass = config.getConfig().get(IRACING_PASSWORD_CONF_KEY);
+        AuthenticatorConfigModel config = validationContext.getAuthenticatorConfig();
+        iRemail = config.getConfig().get(IRACING_EMAIL_CONF_KEY);
+        iRpass = config.getConfig().get(IRACING_PASSWORD_CONF_KEY);
+        String iRacingIdAttributeKey = config.getConfig().get(IRACING_ATTR_KEY_CONF_KEY);
 
         MultivaluedMap<String, String> formData = validationContext.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
 
         String eventError = Errors.INVALID_REGISTRATION;
-        String iRacingId = formData.getFirst(IRACING_ID_ATTR);
+        String iRacingId = formData.getFirst(iRacingIdAttributeKey);
         log.info("Try to validate iRacingId {}", iRacingId);
         if (isBlank(iRacingId)) {
             log.error("Empty iRacingId");
-            errors.add(new FormMessage(IRACING_ID_ATTR, "missingIRacingIdMessage"));
+            errors.add(new FormMessage(iRacingIdAttributeKey, "missingIRacingIdMessage"));
         } else {
             MemberInfoDto memberInfo = getIRacingMemberInfo(Long.parseLong(iRacingId));
             if(memberInfo == null) {
                 log.error("Invalid iRacingId");
-                errors.add(new FormMessage(IRACING_ID_ATTR, "invalidIRacingIdMessage"));
+                errors.add(new FormMessage(iRacingIdAttributeKey, "invalidIRacingIdMessage"));
             }
         }
 
