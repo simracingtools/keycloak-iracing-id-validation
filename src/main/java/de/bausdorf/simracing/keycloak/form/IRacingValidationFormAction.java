@@ -49,6 +49,8 @@ import static org.keycloak.utils.StringUtil.isBlank;
 @Slf4j
 public class IRacingValidationFormAction implements FormAction, FormActionFactory {
     private static final String PROVIDER_ID = "organization-field-validation-action";
+    private static final String FIRSTNAME_ATTR_KEY = "firstName";
+    private static final String LASTNAME_ATTR_KEY = "lastName";
 
     public static final String IRACING_EMAIL_CONF_KEY = "iRacing.email";
     public static final String IRACING_PASSWORD_CONF_KEY = "iRacing.password";
@@ -130,7 +132,10 @@ public class IRacingValidationFormAction implements FormAction, FormActionFactor
 
         String eventError = Errors.INVALID_REGISTRATION;
         String iRacingId = formData.getFirst(iRacingIdAttributeKey);
-        log.info("Try to validate iRacingId {}", iRacingId);
+        String firstName = formData.getFirst(FIRSTNAME_ATTR_KEY);
+        String lastName = formData.getFirst(LASTNAME_ATTR_KEY);
+
+        log.info("Try to validate iRacingId {} for {} {}", iRacingId, firstName, lastName);
         if (isBlank(iRacingId)) {
             log.error("Empty iRacingId");
             errors.add(new FormMessage(iRacingIdAttributeKey, "missingIRacingIdMessage"));
@@ -139,6 +144,14 @@ public class IRacingValidationFormAction implements FormAction, FormActionFactor
             if(memberInfo == null) {
                 log.error("Invalid iRacingId");
                 errors.add(new FormMessage(iRacingIdAttributeKey, "invalidIRacingIdMessage"));
+            } else {
+                String[] nameParts = memberInfo.getDisplayName().split(" ");
+
+                if (nameParts.length > 0 && (!nameParts[0].equalsIgnoreCase(firstName)
+                        || !nameParts[nameParts.length-1].equalsIgnoreCase(lastName))) {
+                    errors.add(new FormMessage(FIRSTNAME_ATTR_KEY, "nameNotMatchingMessage"));
+                    errors.add(new FormMessage(LASTNAME_ATTR_KEY, "nameNotMatchingMessage"));
+                }
             }
         }
 

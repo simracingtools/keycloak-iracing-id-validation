@@ -2,7 +2,7 @@
 
 This project provides a form validation action that is able to check the existence of 
 an iRacing customer ID contained in a user profile field for its existence in the iRacing
-services utilizing the iRacing Data API (https://github.com/simracingtools/ir-data-api-client).
+services and checks if the name given in the user registration form matches the name used in iRacing services utilizing the iRacing Data API (https://github.com/simracingtools/ir-data-api-client).
 
 ## Build
 
