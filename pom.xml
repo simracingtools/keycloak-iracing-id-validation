@@ -5,7 +5,7 @@
 
   <groupId>de.bausdorf.simracing</groupId>
   <artifactId>keycloak-iracingid-validation</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <organization>

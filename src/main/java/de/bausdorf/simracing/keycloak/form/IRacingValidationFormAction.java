@@ -145,10 +145,7 @@ public class IRacingValidationFormAction implements FormAction, FormActionFactor
                 log.error("Invalid iRacingId");
                 errors.add(new FormMessage(iRacingIdAttributeKey, "invalidIRacingIdMessage"));
             } else {
-                String[] nameParts = memberInfo.getDisplayName().split(" ");
-
-                if (nameParts.length > 0 && (!nameParts[0].equalsIgnoreCase(firstName)
-                        || !nameParts[nameParts.length-1].equalsIgnoreCase(lastName))) {
+                if (checkMemberName(firstName, lastName, memberInfo.getDisplayName())) {
                     errors.add(new FormMessage(FIRSTNAME_ATTR_KEY, "nameNotMatchingMessage"));
                     errors.add(new FormMessage(LASTNAME_ATTR_KEY, "nameNotMatchingMessage"));
                 }
@@ -245,5 +242,11 @@ public class IRacingValidationFormAction implements FormAction, FormActionFactor
        }
        log.warn("No member info found");
        return null;
+    }
+
+    private static boolean checkMemberName(String firstName, String lastName, String irDisplayName) {
+        String lowerIrName = irDisplayName.toLowerCase();
+
+        return lowerIrName.contains(firstName.trim().toLowerCase()) && lowerIrName.contains(lastName.trim().toLowerCase());
     }
 }
