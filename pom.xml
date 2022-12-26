@@ -5,7 +5,7 @@
 
   <groupId>de.bausdorf.simracing</groupId>
   <artifactId>keycloak-iracingid-validation</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.4</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <organization>
@@ -108,8 +108,13 @@
     </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
