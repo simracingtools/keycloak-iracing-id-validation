@@ -43,6 +43,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.keycloak.utils.StringUtil.isBlank;
 
@@ -145,7 +146,7 @@ public class IRacingValidationFormAction implements FormAction, FormActionFactor
                 log.error("Invalid iRacingId");
                 errors.add(new FormMessage(iRacingIdAttributeKey, "invalidIRacingIdMessage"));
             } else {
-                if (checkMemberName(firstName, lastName, memberInfo.getDisplayName())) {
+                if (!checkMemberName(firstName, lastName, memberInfo.getDisplayName())) {
                     errors.add(new FormMessage(FIRSTNAME_ATTR_KEY, "nameNotMatchingMessage"));
                     errors.add(new FormMessage(LASTNAME_ATTR_KEY, "nameNotMatchingMessage"));
                 }
@@ -244,9 +245,18 @@ public class IRacingValidationFormAction implements FormAction, FormActionFactor
        return null;
     }
 
-    private static boolean checkMemberName(String firstName, String lastName, String irDisplayName) {
-        String lowerIrName = irDisplayName.toLowerCase();
+    public boolean checkMemberName(String firstName, String lastName, String irDisplayName) {
+        String[] firstNameParts = firstName.trim().split(" ");
+        String[] lastNameParts = lastName.trim().split(" ");
+        String[] irNameParts = irDisplayName.trim().split(" ");
 
-        return lowerIrName.contains(firstName.trim().toLowerCase()) && lowerIrName.contains(lastName.trim().toLowerCase());
+        log.info("Check first name '{}', last name '{}' against iRacing name '{}'", firstNameParts, lastNameParts, irNameParts);
+        AtomicBoolean firstNameCheck = new AtomicBoolean(false);
+        Arrays.stream(firstNameParts).forEach(part -> firstNameCheck.set(Arrays.stream(irNameParts).anyMatch(iRPart -> iRPart.equalsIgnoreCase(part))));
+        AtomicBoolean lastNameCheck = new AtomicBoolean(false);
+        Arrays.stream(lastNameParts).forEach(part -> lastNameCheck.set(Arrays.stream(irNameParts).anyMatch(iRPart -> iRPart.equalsIgnoreCase(part))));
+        log.info("Name check {}", firstNameCheck.get() && lastNameCheck.get() ? "OK" : "NOT OK");
+
+        return firstNameCheck.get() && lastNameCheck.get();
     }
 }
